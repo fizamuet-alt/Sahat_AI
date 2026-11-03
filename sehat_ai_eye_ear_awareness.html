@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SEHAT AI – Eye & Ear Awareness</title>
+<style>
+:root{--navy:#12304a;--teal:#087e8b;--mint:#e8f7f5;--gold:#ffbf69;--ink:#203040;--paper:#f4f8fb}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--paper);color:var(--ink)}
+header{background:linear-gradient(120deg,#12304a,#087e8b);color:white;padding:26px 18px;text-align:center}
+header h1{margin:0 0 8px;font-size:clamp(25px,5vw,38px)}header p{margin:0}
+nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:12px;background:white;position:sticky;top:0;z-index:2;box-shadow:0 2px 8px #0001}
+button,select{font:inherit}nav button,.action{border:0;border-radius:12px;padding:11px 15px;background:var(--teal);color:white;cursor:pointer;font-weight:bold}
+nav button{background:#e7f1f5;color:var(--navy)}nav button.active{background:var(--teal);color:white}
+main{max-width:1000px;margin:20px auto;padding:0 14px}.panel{display:none;background:white;border-radius:18px;padding:22px;margin-bottom:18px;box-shadow:0 5px 18px #17334a12}.panel.active{display:block}
+h2{color:var(--navy);margin-top:0}.muted{color:#536575;line-height:1.55}.notice{background:#fff4df;border-left:5px solid var(--gold);padding:13px;border-radius:9px;line-height:1.5}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}.card{background:var(--mint);padding:17px;border-radius:14px}
+.bigletter{font-size:clamp(58px,13vw,110px);font-weight:bold;text-align:center;color:var(--navy);padding:20px}
+.answers{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.answers button{min-width:90px}
+.result{font-size:19px;font-weight:bold;padding:15px;border-radius:12px;background:#edf5fa;margin-top:14px}
+label{display:block;margin:10px 0 5px;font-weight:bold}input,select{padding:10px;border:1px solid #b9c8d2;border-radius:9px;max-width:100%}
+footer{text-align:center;padding:25px;color:#637585;font-size:13px}
+#chatlog{height:190px;overflow:auto;background:#f4f8fb;padding:12px;border-radius:10px;margin:12px 0}
+#chatlog p{margin:7px 0}.small{font-size:13px}.action:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+<body>
+<header>
+  <h1>SEHAT AI</h1>
+  <p>Smart Eye & Ear Awareness • School STEAM Project</p>
+  <p>آنکھوں اور کانوں کی صحت • اکين ۽ ڪنن جي صحت</p>
+</header>
+<nav>
+  <button class="active" data-tab="home">Home</button>
+  <button data-tab="eye">Eye Zone</button>
+  <button data-tab="ear">Ear Zone</button>
+  <button data-tab="learn">Learn & AI Guide</button>
+  <button data-tab="report">My Activity</button>
+</nav>
+<main>
+<section id="home" class="panel active">
+<h2>Welcome to the Smart Health Awareness Station</h2>
+<p class="muted">Explore how our eyes and ears help us learn. Complete two short educational activities and read the health tips.</p>
+<div class="cards">
+ <div class="card"><h3>👁 Eye Zone</h3><p>Letter and symbol recognition activity.</p><button class="action" onclick="showTab('eye')">Start eye activity</button></div>
+ <div class="card"><h3>👂 Ear Zone</h3><p>Gentle sound-awareness activity.</p><button class="action" onclick="showTab('ear')">Start ear activity</button></div>
+ <div class="card"><h3>🤖 AI Guide</h3><p>Ask a rule-based health-awareness chatbot.</p><button class="action" onclick="showTab('learn')">Open AI guide</button></div>
+</div>
+<div class="notice" style="margin-top:16px"><b>Important:</b> This is an educational demonstration, not a medical eye or hearing test. It cannot diagnose a condition or confirm that vision/hearing is normal. If a student has difficulty seeing or hearing, tell a parent/guardian and arrange an assessment with a qualified professional.</div>
+</section>
+
+<section id="eye" class="panel">
+<h2>👁 Eye Zone – Symbol Recognition</h2>
+<p class="muted">Look at the symbol and choose the matching symbol below. This is a classroom game only; screen size, distance and lighting are not calibrated for a clinical vision test.</p>
+<div id="eyePrompt" class="bigletter" aria-live="polite">E</div>
+<div id="eyeChoices" class="answers"></div>
+<p id="eyeProgress" class="muted">Question 0 of 5</p>
+<button class="action" id="eyeNext" onclick="nextEye()">Start activity</button>
+<div id="eyeResult" class="result" hidden></div>
+</section>
+
+<section id="ear" class="panel">
+<h2>👂 Ear Zone – Gentle Sound Awareness</h2>
+<p class="muted">This activity plays a short, soft tone. Tap “I heard it” or “I did not hear it”. It is a demonstration of listening attention, not an audiometry or hearing test.</p>
+<div class="notice">Use a comfortable, low device volume. Never turn the volume up to force a sound to be heard. Stop if the sound feels uncomfortable. Headphones are optional; normal speakers are fine.</div>
+<p><b>Round:</b> <span id="earRound">0</span> of 3</p>
+<button class="action" onclick="playTone()" id="playToneBtn">Play gentle tone</button>
+<div class="answers" style="margin-top:12px">
+<button class="action" onclick="answerEar(true)" id="heardBtn" disabled>I heard it</button>
+<button class="action" onclick="answerEar(false)" id="notHeardBtn" disabled>I did not hear it</button>
+</div>
+<p id="earFeedback" class="muted" aria-live="polite"></p>
+<div id="earResult" class="result" hidden></div>
+</section>
+
+<section id="learn" class="panel">
+<h2>🤖 Learn & AI Guide</h2>
+<div class="cards">
+ <div class="card"><h3>Eye care</h3><ul><li>Take regular breaks during screen use.</li><li>Read in comfortable light.</li><li>Do not rub irritated eyes.</li><li>Tell an adult about blurred vision or eye discomfort.</li></ul></div>
+ <div class="card"><h3>Ear care</h3><ul><li>Keep listening volume comfortable.</li><li>Take breaks from headphones.</li><li>Never put objects into the ear canal.</li><li>Tell an adult about ear pain or hearing difficulty.</li></ul></div>
+</div>
+<h3>Ask the AI Awareness Guide</h3>
+<p class="muted small">This prototype uses simple keyword rules, not a trained AI model. It gives general educational information only.</p>
+<div id="chatlog"><p><b>Guide:</b> Hello! Ask me about eye care, ear care, screen breaks or hearing safety.</p></div>
+<label for="question">Your question</label>
+<input id="question" style="width:min(100%,620px)" placeholder="Example: How can I care for my ears?">
+<button class="action" onclick="askGuide()">Ask</button>
+</section>
+
+<section id="report" class="panel">
+<h2>My Activity Summary</h2>
+<p class="muted">This summary stays in this browser tab and is not sent to a server. Do not enter names, phone numbers or private medical information.</p>
+<div class="cards">
+ <div class="card"><b>Eye game</b><p id="eyeSummary">Not attempted</p></div>
+ <div class="card"><b>Sound activity</b><p id="earSummary">Not attempted</p></div>
+</div>
+<div class="notice" style="margin-top:16px">Activity results are not medical results. A game score cannot tell whether someone needs glasses or has hearing loss. If there is a concern, ask a parent/guardian to arrange a professional check.</div>
+<button class="action" onclick="window.print()">Print awareness summary</button>
+</section>
+</main>
+<footer>SEHAT AI • Educational STEAM prototype • No diagnosis • No data upload</footer>
+<script>
+const tabs=document.querySelectorAll('nav button');
+function showTab(id){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');tabs.forEach(b=>b.classList.toggle('active',b.dataset.tab===id))}
+tabs.forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+const eyeItems=[['E',['E','F','P','L']],['O',['C','O','D','Q']],['△',['△','○','□','☆']],['P',['R','P','B','F']],['☆',['☆','◇','○','□']]];
+let eyeIndex=-1,eyeScore=0,eyeDone=false;
+function nextEye(){
+ if(eyeDone){eyeIndex=-1;eyeScore=0;eyeDone=false;document.getElementById('eyeResult').hidden=true;}
+ eyeIndex++;
+ if(eyeIndex>=eyeItems.length){eyeDone=true;document.getElementById('eyePrompt').textContent='✓';document.getElementById('eyeChoices').innerHTML='';document.getElementById('eyeNext').textContent='Try again';document.getElementById('eyeProgress').textContent='Completed';document.getElementById('eyeResult').hidden=false;document.getElementById('eyeResult').textContent=`You matched ${eyeScore} out of ${eyeItems.length} symbols. This is only a game score, not a vision result.`;document.getElementById('eyeSummary').textContent=`${eyeScore}/${eyeItems.length} symbols matched (game only)`;return;}
+ const [target,choices]=eyeItems[eyeIndex];document.getElementById('eyePrompt').textContent=target;document.getElementById('eyeProgress').textContent=`Question ${eyeIndex+1} of ${eyeItems.length}`;document.getElementById('eyeNext').textContent='Next question';
+ document.getElementById('eyeChoices').innerHTML='';
+ choices.forEach(c=>{const b=document.createElement('button');b.className='action';b.textContent=c;b.onclick=()=>{if(b.dataset.done)return;b.dataset.done='1';if(c===target)eyeScore++;[...document.querySelectorAll('#eyeChoices button')].forEach(x=>x.disabled=true);document.getElementById('eyeFeedback')?.remove();const msg=document.createElement('p');msg.id='eyeFeedback';msg.className='muted';msg.textContent=c===target?'Correct match!':'That was a different symbol. Keep learning!';document.getElementById('eyeChoices').after(msg);document.getElementById('eyeNext').disabled=false;};document.getElementById('eyeChoices').appendChild(b);});
+ document.getElementById('eyeNext').disabled=true;
+}
+
+
+let earCount=0,earHeard=0,audioCtx=null,awaiting=false;
+function playTone(){
+ if(earCount>=3)return;
+ try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();osc.type='sine';osc.frequency.value=440;gain.gain.value=0.035;osc.connect(gain);gain.connect(audioCtx.destination);osc.start();osc.stop(audioCtx.currentTime+0.35);awaiting=true;document.getElementById('heardBtn').disabled=false;document.getElementById('notHeardBtn').disabled=false;document.getElementById('playToneBtn').disabled=true;document.getElementById('earFeedback').textContent='Now choose the response that matches your experience.';}catch(e){document.getElementById('earFeedback').textContent='Audio is not available in this browser. You can still explain the ear-care section.';}
+}
+function answerEar(heard){
+ if(!awaiting)return;awaiting=false;earCount++;if(heard)earHeard++;
+ document.getElementById('earRound').textContent=earCount;document.getElementById('heardBtn').disabled=true;document.getElementById('notHeardBtn').disabled=true;
+ document.getElementById('earFeedback').textContent='Thank you for participating. This response is not a measure of hearing ability.';
+ if(earCount<3)document.getElementById('playToneBtn').disabled=false;
+ else{document.getElementById('earResult').hidden=false;document.getElementById('earResult').textContent=`You selected “I heard it” ${earHeard} out of 3 times. This is a listening activity only, not a hearing result.`;document.getElementById('earSummary').textContent=`Heard response selected ${earHeard}/3 times (activity only)`;}
+}
+
+function askGuide(){
+ const input=document.getElementById('question'),q=input.value.trim().toLowerCase();if(!q)return;
+ let answer="I can share general awareness tips. If you have a concern about seeing or hearing, tell a trusted adult and ask about a professional assessment.";
+ if(/eye|vision|see|screen|blur|آم/.test(q))answer="For eye health: read in comfortable light, take regular breaks from screens, avoid rubbing your eyes, and tell an adult if you have blurred vision or discomfort. An eye-care professional can check your vision.";
+ else if(/ear|hear|sound|headphone|کان/.test(q))answer="For ear health: keep sound at a comfortable level, take listening breaks, never put objects into your ear canal, and tell an adult about pain or hearing difficulty. A qualified professional can assess hearing.";
+ else if(/break|20|screen/.test(q))answer="During long screen sessions, look away regularly, blink, and take a short break. Follow your teacher or eye-care professional's advice.";
+ else if(/pain|hurt|problem|difficulty/.test(q))answer="Please tell a parent, guardian or teacher. This app cannot assess symptoms. A qualified health professional can advise what check is needed.";
+ const log=document.getElementById('chatlog');const user=document.createElement('p'),bot=document.createElement('p');user.innerHTML='<b>You:</b> '+escapeHtml(input.value);bot.innerHTML='<b>Guide:</b> '+answer;log.append(user,bot);log.scrollTop=log.scrollHeight;input.value='';
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+</script>
+</body></html>
